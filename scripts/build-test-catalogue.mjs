@@ -195,15 +195,8 @@ for (const [lang, rowsOf] of Object.entries(app.i18n)) {
 }
 console.log(`i18n packs rewritten: ${changed}`)
 
-// Media: the fixtures' stills and clips, restored beside the app's own so the dev server's
-// /exercise-media middleware and any test that reads a file find them either way.
-let copied = 0
-for (const e of added) {
-  for (const [dir, ext] of [['still', '.webp'], ['clip', '.mp4']]) {
-    const from = path.join(MEDIA_FX, dir, e.id + ext)
-    const to = path.join(MEDIA, dir, e.id + ext)
-    if (fs.existsSync(from) && !fs.existsSync(to)) { fs.copyFileSync(from, to); copied++ }
-  }
-}
-if (copied) console.log(`copied ${copied} fixture media file(s) into catalogue/media/ (gitignored)`)
+// No media is copied. The fixtures' stills and clips stay in catalogue/media-fixtures/ and
+// the dev server serves them from there alongside catalogue/media/ (frontend/vite.config.js),
+// so a build never sees them: stage-media.mjs reads catalogue/media only, and what ships is
+// the app's own 19 exercises and nothing else.
 console.log(`\nwrote ${path.relative(ROOT, OUT)}`)

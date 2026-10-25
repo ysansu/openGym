@@ -177,7 +177,12 @@ describe('plate line under set rows', () => {
   })
 
   it('the ⋯ menu names a bar only for a bar: a machine loaded per side with its own weight reads Per side', () => {
-    const MACHINE = Object.values(EXIDX).find(e => e.eq === 'leverage machine').id
+    // A loaded lower-body machine, picked by id rather than by "the first leverage machine
+    // the index holds": a cardio machine logs time and speed and never shows a plate line at
+    // all, and an assisted one inverts what the load means. The point of the case is that a
+    // per-side load reads Per side while a barbell reads Bar.
+    const MACHINE = '2287'   // lever alternate leg press
+    expect(EXIDX[MACHINE].eq).toBe('leverage machine')
     mount([entry(MACHINE, [work(145)], { w: 145 })], {
       loadKind: { [MACHINE]: { kind: 'pairs', _ts: 1 } }, barWeights: { [MACHINE]: 50 },
     })
