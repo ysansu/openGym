@@ -106,3 +106,8 @@ app/src/main/res/xml/config.xml
 /asset-packs.settings.gradle
 /asset-packs.app.gradle
 /app/src/play/assets/anim-packs.json
+
+# Release signing: the keystore and its passwords stay off this repository.
+keystore.properties
+*.keystore
+*.jks

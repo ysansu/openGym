@@ -1,10 +1,41 @@
 apply plugin: 'com.android.application'
 
+// A release build is signed with the keystore android/keystore.properties names, when that
+// file is there. It is not committed (android/.gitignore), so a clone builds a debug APK
+// without any setup, and this machine builds a signed release:
+//
+//   storeFile=/absolute/path/to/opengym-release.keystore
+//   storePassword=…
+//   keyAlias=…
+//   keyPassword=…
+//
+// The values are read through a Properties stream, which decodes ISO-8859-1, and a backslash
+// is an escape there — so the path must be ASCII with forward slashes.
+def keystorePropsFile = rootProject.file("keystore.properties")
+def hasReleaseSigning = keystorePropsFile.exists()
+def keystoreProps = new Properties()
+if (hasReleaseSigning) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+
 android {
     namespace = "ch.duartesantos.opengym"
     compileSdk = rootProject.ext.compileSdkVersion
     buildFeatures {
         buildConfig = true
+    }
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+                // v1 alongside v2/v3: Android 6 and older only read v1, and minSdk here is 24.
+                enableV1Signing true
+                enableV2Signing true
+            }
+        }
     }
     defaultConfig {
         applicationId "ch.duartesantos.opengym"
@@ -23,6 +54,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (hasReleaseSigning) { signingConfig signingConfigs.release }
             // The barcode scanner's ML Kit library ships a native build for four CPU families.
             // Phones are ARM; the two x86 builds only serve emulators and a few Chromebooks, which
             // run ARM code through translation anyway. Leaving them out takes about 12 MB off

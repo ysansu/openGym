@@ -42,3 +42,7 @@ catalogue/test-fixtures/
 catalogue/media-fixtures/
 exports/
 
+
+# Release signing key and its password (never committed)
+keystore/
+out/
