@@ -6,12 +6,20 @@
  *
  *   node scripts/build-coach-assets.mjs           # write
  *   node scripts/build-coach-assets.mjs --check   # fail if stale (CI)
+ *   node scripts/build-coach-assets.mjs --test    # write from the test dataset instead
  *
  * The API needs the catalogue for two things the client cannot do for it: validating that
  * every exercise id a proposal references actually exists (FR-16), and building payloads for
  * scheduled reviews, which run with nobody's browser open. Rather than teach the api build to
  * reach into frontend/, the index is generated and committed — the same arrangement the
  * translated instruction packs in src/instr/ already use.
+ *
+ * --test writes the same file from exercises-test-data.js (the app catalogue plus the test
+ * fixtures, scripts/build-test-catalogue.mjs). The suites under frontend/ import the server's
+ * payload.js and plan-hash.js to check the two runtimes agree field for field; with only the
+ * app's 19 exercises in the library, an id a fixture names resolves on the client and not on
+ * the server, and the parity check fails on the first one. Production still gets the app
+ * catalogue — run this without --test, as the release build does.
  *
  * Only the fields the Coach reasons over are kept: an id, a name, and the three taxonomy
  * fields it filters on. Instructions, images and secondary muscles stay out — they would
@@ -28,25 +36,35 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const core = join(root, 'api', 'coach', 'core');
 const check = process.argv.includes('--check');
+// --test generates from the test dataset (see the header). The committed artefact is the
+// app catalogue, so a --test run is expected to be stale for the shipping build: CI runs
+// --check, which is what gates a commit, and the two are never mixed in one invocation.
+const testBuild = process.argv.includes('--test');
 
 const outputs = [];
 
 // --- library ---
 {
-  const src = join(root, 'frontend', 'src', 'lib', 'exercises-data.js');
+  const name = testBuild ? 'exercises-test-data.js' : 'exercises-data.js';
+  const src = join(root, 'frontend', 'src', 'lib', name);
   const { EXDB } = await import(pathToFileURL(src).href);
   // The library slice a prompt gets is capped (MAX_LIBRARY) and takes each body part's entries in
   // this order, so the order decides what the Coach can pick from. Since the catalogue grew past
   // 5,000 exercises (v1.4.0), the well-known core comes first: the 1,324 exercises openGym always
   // had, then the newer lifts, and stretches, mobility, yoga and the like last.
   const LATE = new Set(['stretching', 'mobility', 'yoga', 'pilates', 'rehab', 'combat']);
-  const catDir = join(root, 'catalogue', 'exercises');
+  // The well-known core, read off the catalogue's own textSource. A test build also reads
+  // test-fixtures/, or every fixture would rank as a newer lift.
+  const catDirs = [join(root, 'catalogue', 'exercises')];
+  if (testBuild) catDirs.push(join(root, 'catalogue', 'test-fixtures'));
   const classic = new Set();
-  try {
-    for (const f of readdirSync(catDir)) {
-      if (JSON.parse(readFileSync(join(catDir, f), 'utf8')).textSource === 'exercisedb') classic.add(f.slice(0, -5));
-    }
-  } catch { /* no catalogue checked out: keep EXDB's order */ }
+  for (const catDir of catDirs) {
+    try {
+      for (const f of readdirSync(catDir)) {
+        if (JSON.parse(readFileSync(join(catDir, f), 'utf8')).textSource === 'exercisedb') classic.add(f.slice(0, -5));
+      }
+    } catch { /* no catalogue checked out: keep EXDB's order */ }
+  }
   const rank = e => (LATE.has(e.cat) ? 2 : classic.size && !classic.has(e.id) ? 1 : 0);
   const index = EXDB.map((e, i) => [rank(e), i, e]).sort((a, b) => a[0] - b[0] || a[1] - b[1])
     .map(([, , e]) => ({ id: e.id, n: e.n, bp: e.bp, tg: e.tg, eq: e.eq }));

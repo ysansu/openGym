@@ -78,6 +78,19 @@ export function validateCatalogue(dir) {
     else seen.set(e.name, e.id)
   }
 
+  // An i18n row may name an exercise that lives in test-fixtures/ rather than exercises/:
+  // the fixtures keep their translations so the test suite can read them
+  // (scripts/restore-test-i18n.mjs), and the shipping build drops those rows from the packs
+  // it emits (scripts/catalogue/build.mjs). So the id has to resolve to *some* exercise,
+  // not necessarily one this build ships.
+  const fixtureDir = path.join(dir, 'test-fixtures')
+  const fixtureIds = new Set()
+  if (fs.existsSync(fixtureDir)) {
+    for (const f of fs.readdirSync(fixtureDir).filter(f => f.endsWith('.json'))) {
+      fixtureIds.add(f.slice(0, -5))
+    }
+  }
+
   const i18n = {}
   const i18nDir = path.join(dir, 'i18n')
   for (const f of fs.readdirSync(i18nDir).filter(f => f.endsWith('.json')).sort()) {
@@ -88,7 +101,7 @@ export function validateCatalogue(dir) {
     try { rows = JSON.parse(fs.readFileSync(path.join(i18nDir, f), 'utf8')) } catch (err) { say(file, 'not valid JSON: ' + err.message); continue }
     for (const [id, r] of Object.entries(rows)) {
       const ex = ids.get(id)
-      if (!ex || ex.variantOf) { say(file, `"${id}" is not an exercise id`); continue }
+      if ((!ex || ex.variantOf) && !fixtureIds.has(id)) { say(file, `"${id}" is not an exercise id`); continue }
       for (const k of Object.keys(r)) if (!I18N_KEYS.includes(k)) say(file, `"${id}": unknown field "${k}" (use ${I18N_KEYS.join(', ')})`)
       if (r.name != null && !isText(r.name)) say(file, `"${id}".name must be text`)
       if (r.description != null && typeof r.description !== 'string') say(file, `"${id}".description must be text`)

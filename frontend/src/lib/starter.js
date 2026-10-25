@@ -5,33 +5,139 @@
 // A routine is [key, name, emoji, [[exerciseId, sets, reps], …]]. The key is what a plan's
 // schedule points at, so a weekday never depends on the position of a routine in the array.
 // Names stay canonical English — they become ordinary user routines, which are not translated.
+//
+// This catalogue was pruned to the 19 exercises of the owner's own plan (dumbbell + cable),
+// so every id below resolves in this build. The exercises that used to be here are archived
+// under catalogue/exercises-archive/ and can be restored with
+// `node scripts/catalogue/prune.mjs --restore`.
 import { uid } from './format.js'
 import { EXIDX } from './exercises.js'
 import { eqAvailable, ALL_EQUIPMENT } from './equipment.js'
 
+// The owner's plan, as catalogue ids. Dumbbell-only on the legs and press days, cable for
+// the pulls. Sets and reps are the prescription that ships with each plan below.
+const EX = {
+  legWarm: '1604',      // world great stretch
+  catCow: '4580',       // cat cow stretch
+  sldl: '1757',         // dumbbell single leg deadlift
+  bulg: '2290',         // dumbbell bulgarian split squat
+  goblet: '1760',       // dumbbell goblet squat
+  rdl: '1459',          // dumbbell romanian deadlift
+  hangRaise: '0472',    // hanging leg raise
+  shoulderCircle: '4395',
+  dbBench: '0289',      // dumbbell bench press
+  chestDip: '0251',
+  crossover: '1269',    // cable standing up straight crossovers
+  dbIncline: '0314',    // dumbbell incline bench press
+  cableY: '3342',       // cable y raise
+  skull: '4151',        // dumbbell lying floor skullcrusher
+  oneArmPd: '1204',     // cable one arm lat pulldown
+  latPd: '2330',        // cable lat pulldown full range of motion
+  row: '0861',          // cable seated row
+  wideRow: '0218',      // cable seated wide-grip row
+  cableCurl: '0868',
+}
+
+// Cat-cow opens every session, legs and pushes alike.
+const catCowPair = [[EX.catCow, 1, 8]]
+
 const PPL = [
-  ['push', 'Push Day', 'barbell', [['0025', 4, 8], ['0047', 3, 10], ['0426', 3, 10], ['0334', 3, 12], ['0241', 3, 12], ['0251', 3, 10]]],
-  ['pull', 'Pull Day', 'pullup', [['2330', 4, 10], ['0027', 4, 8], ['1323', 3, 10], ['0031', 3, 10], ['0313', 3, 12]]],
-  ['legs', 'Leg Day', 'legs', [['0043', 4, 8], ['0085', 3, 10], ['0739', 3, 12], ['0585', 3, 12], ['0586', 3, 12], ['0605', 4, 15]]]
+  ['push', 'Push Day', 'barbell', [
+    ...catCowPair,
+    [EX.shoulderCircle, 1, 10],
+    [EX.dbBench, 4, 8],
+    [EX.chestDip, 3, 10],
+    [EX.crossover, 3, 12],
+    [EX.dbIncline, 3, 10],
+    [EX.cableY, 3, 12],
+    [EX.skull, 3, 12],
+  ]],
+  ['pull', 'Pull Day', 'pullup', [
+    ...catCowPair,
+    [EX.oneArmPd, 4, 10],
+    [EX.latPd, 4, 10],
+    [EX.row, 3, 10],
+    [EX.wideRow, 3, 12],
+    [EX.cableCurl, 3, 12],
+  ]],
+  ['legs', 'Leg Day', 'legs', [
+    ...catCowPair,
+    [EX.goblet, 4, 8],
+    [EX.bulg, 3, 10],
+    [EX.rdl, 3, 10],
+    [EX.sldl, 3, 12],
+    [EX.hangRaise, 4, 15],
+  ]],
 ]
 
 const UPPER_LOWER = [
-  ['upper-a', 'Upper A', 'barbell', [['0025', 3, 8], ['2330', 3, 10], ['0047', 2, 10], ['1323', 2, 10], ['0334', 2, 12], ['0241', 2, 12], ['0031', 2, 12]]],
-  ['lower-a', 'Lower A', 'legs', [['0043', 3, 8], ['0085', 3, 8], ['0739', 2, 10], ['0586', 2, 12], ['0605', 3, 15]]],
-  ['upper-b', 'Upper B', 'barbell', [['0047', 3, 8], ['0027', 3, 8], ['0426', 2, 10], ['2330', 2, 10], ['0334', 2, 12], ['0241', 2, 12], ['0313', 2, 12]]],
-  ['lower-b', 'Lower B', 'legs', [['0739', 3, 10], ['0085', 2, 10], ['0585', 2, 12], ['0586', 3, 12], ['0605', 3, 15]]]
+  ['upper-a', 'Upper A', 'barbell', [
+    ...catCowPair,
+    [EX.shoulderCircle, 1, 10],
+    [EX.dbBench, 3, 8],
+    [EX.latPd, 3, 10],
+    [EX.crossover, 3, 12],
+    [EX.cableY, 3, 12],
+    [EX.skull, 3, 12],
+  ]],
+  ['lower-a', 'Lower A', 'legs', [
+    ...catCowPair,
+    [EX.goblet, 3, 8],
+    [EX.rdl, 3, 8],
+    [EX.sldl, 3, 10],
+    [EX.hangRaise, 3, 15],
+  ]],
+  ['upper-b', 'Upper B', 'barbell', [
+    ...catCowPair,
+    [EX.shoulderCircle, 1, 10],
+    [EX.dbIncline, 3, 8],
+    [EX.row, 3, 10],
+    [EX.wideRow, 3, 12],
+    [EX.cableY, 3, 12],
+    [EX.cableCurl, 3, 12],
+  ]],
+  ['lower-b', 'Lower B', 'legs', [
+    ...catCowPair,
+    [EX.bulg, 3, 10],
+    [EX.sldl, 3, 10],
+    [EX.goblet, 2, 12],
+    [EX.hangRaise, 3, 15],
+  ]],
 ]
 
 const FULL_BODY = [
-  ['fb-a', 'Full Body A', 'figureStrength', [['0043', 3, 8], ['0025', 3, 8], ['2330', 3, 10], ['0586', 3, 12], ['0334', 2, 12], ['0031', 2, 12]]],
-  ['fb-b', 'Full Body B', 'figureStrength', [['0085', 3, 8], ['0047', 3, 10], ['1323', 3, 10], ['0585', 3, 12], ['0334', 2, 12], ['0241', 2, 12]]],
-  ['fb-c', 'Full Body C', 'figureStrength', [['0739', 3, 10], ['0025', 2, 10], ['0027', 3, 10], ['0426', 2, 10], ['0586', 3, 12], ['0605', 3, 15]]]
+  ['fb-a', 'Full Body A', 'figureStrength', [
+    ...catCowPair,
+    [EX.shoulderCircle, 1, 10],
+    [EX.goblet, 3, 8],
+    [EX.dbBench, 3, 8],
+    [EX.latPd, 3, 10],
+    [EX.cableY, 2, 12],
+    [EX.cableCurl, 2, 12],
+  ]],
+  ['fb-b', 'Full Body B', 'figureStrength', [
+    ...catCowPair,
+    [EX.shoulderCircle, 1, 10],
+    [EX.rdl, 3, 8],
+    [EX.dbIncline, 3, 10],
+    [EX.row, 3, 10],
+    [EX.cableY, 2, 12],
+    [EX.skull, 2, 12],
+  ]],
+  ['fb-c', 'Full Body C', 'figureStrength', [
+    ...catCowPair,
+    [EX.shoulderCircle, 1, 10],
+    [EX.bulg, 3, 10],
+    [EX.dbBench, 2, 10],
+    [EX.wideRow, 3, 10],
+    [EX.hangRaise, 3, 15],
+  ]],
 ]
 
 const FIVE_BY_FIVE = [
-  ['5x5-a', '5×5 A', 'barbell', [['0043', 5, 5], ['0025', 5, 5], ['0027', 5, 5]]],
-  ['5x5-b', '5×5 B', 'barbell', [['0085', 5, 5], ['0426', 5, 5], ['2330', 5, 5]]],
-  ['5x5-c', '5×5 C', 'barbell', [['0739', 5, 5], ['0047', 5, 5], ['1323', 5, 5]]]
+  ['5x5-a', '5×5 A', 'barbell', [...catCowPair, [EX.goblet, 5, 5], [EX.dbBench, 5, 5], [EX.row, 5, 5]]],
+  ['5x5-b', '5×5 B', 'barbell', [...catCowPair, [EX.rdl, 5, 5], [EX.dbIncline, 5, 5], [EX.latPd, 5, 5]]],
+  ['5x5-c', '5×5 C', 'barbell', [...catCowPair, [EX.bulg, 5, 5], [EX.dbBench, 5, 5], [EX.wideRow, 5, 5]]],
 ]
 
 // [weekday, routineKey] — weekday is a DAYN index, so 1 is Monday. Fixed weeks only: every
@@ -99,6 +205,12 @@ export const substituteFor = (ex, equipment, taken) => {
 // Re-cuts a routine list for an equipment list: what you can already do stays, what you can't
 // is swapped for its closest match, and what has no match is dropped (with its routine, when
 // that leaves it empty). Sets and reps carry over unchanged.
+//
+// The warm-up block (cat-cow, shoulder circles) is body-weight by definition and never
+// swapped: fitting is about what a lift needs, and a warm-up nobody ticked equipment for is
+// still a warm-up. It is recognised by its 1×N prescription rather than by an id list, so
+// adding a second opener does not need a change here.
+const isWarmup = ([, sets, reps]) => sets === 1 && reps <= 10
 const fitRoutines = (routines, equipment) => {
   let swapped = 0, dropped = 0
   const fitted = routines.map(([key, name, emoji, list]) => {
@@ -106,7 +218,7 @@ const fitRoutines = (routines, equipment) => {
     const out = []
     for (const [id, sets, reps] of list) {
       const ex = EXIDX[id]
-      if (!ex || eqAvailable(equipment, ex)) { out.push([id, sets, reps]); continue }
+      if (!ex || isWarmup([id, sets, reps]) || eqAvailable(equipment, ex)) { out.push([id, sets, reps]); continue }
       const sub = substituteFor(ex, equipment, taken)
       if (!sub) { dropped++; continue }
       taken.add(sub.id)

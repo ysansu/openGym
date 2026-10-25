@@ -135,7 +135,7 @@ describe('starter plan chooser, fitted to equipment', () => {
     const host = renderTop()
     expect(chip(host, 'As written').className).toContain('on')
     act(() => { rowFor(host, 'Push / Pull / Legs').click() })
-    expect(exIds()).toContain('0025')   // the barbell bench press
+    expect(exIds()).toContain('0289')   // the dumbbell bench press
   })
 
   it('starts on the profile the library is filtered by, and fits the plan to it', () => {
@@ -144,7 +144,8 @@ describe('starter plan chooser, fitted to equipment', () => {
     const host = renderTop()
     expect(chip(host, 'Home').className).toContain('on')
     act(() => { rowFor(host, 'Push / Pull / Legs').click() })
-    expect(exIds()).not.toContain('0025')
+    // The plan as written carries cable work; a dumbbell-only profile swaps all of it.
+    expect(exIds()).not.toContain('1269')
     expect(useUI.getState().toastMsg).toMatch(/^Push \/ Pull \/ Legs loaded, fitted to "Home": \d+ swapped, 0 dropped$/)
   })
 
@@ -154,7 +155,7 @@ describe('starter plan chooser, fitted to equipment', () => {
     const host = renderTop()
     act(() => { chip(host, 'Home').click() })
     act(() => { rowFor(host, '5×5').click() })
-    expect(exIds()).not.toContain('0043')   // no barbell squat on a dumbbell-only profile
+    expect(exIds()).not.toContain('0861')   // no cable row on a dumbbell-only profile
   })
 
   it('adds a fitted plan beside a same-named routine with other exercises, instead of reusing it', () => {

@@ -31,6 +31,10 @@ if (problems.length) {
   process.exit(1)
 }
 
+// Every id this catalogue has, variants included: an i18n row for anything else belongs to
+// an exercise that is not shipped here and is dropped from the packs below.
+const ids = new Set(exercises.map(e => e.id))
+
 // Old ids sort the way they always did (by name, as the dataset shipped); the list order is what
 // the library shows before any filter, so it should not jump around between releases.
 const rows = exercises
@@ -75,7 +79,12 @@ const byId = (pick) => Object.fromEntries(exercises.filter(e => !e.variantOf).ma
 files['frontend/src/instr/en.js'] = pack(byId(e => e.instructions))
 files['frontend/src/exercise-desc/en.js'] = pack(byId(e => e.description))
 for (const [lang, rowsOf] of Object.entries(i18n)) {
-  const pick = key => Object.fromEntries(Object.entries(rowsOf).filter(([, r]) => r[key] && (!Array.isArray(r[key]) || r[key].length)).map(([id, r]) => [id, r[key]]))
+  // A row for an exercise that is not in this catalogue is dropped, not shipped: the i18n
+  // files keep their rows for the test fixtures (scripts/restore-test-i18n.mjs), and only
+  // the app's own 19 belong in the bundle. A stale row would otherwise render a translated
+  // name for an exercise the app cannot show.
+  const kept = Object.fromEntries(Object.entries(rowsOf).filter(([id]) => ids.has(id)))
+  const pick = key => Object.fromEntries(Object.entries(kept).filter(([, r]) => r[key] && (!Array.isArray(r[key]) || r[key].length)).map(([id, r]) => [id, r[key]]))
   const instr = pick('instructions'), names = pick('name'), desc = pick('description')
   if (Object.keys(instr).length) files[`frontend/src/instr/${lang}.js`] = pack(instr)
   if (Object.keys(names).length) files[`frontend/src/exercise-names/${lang}.js`] = pack(names)

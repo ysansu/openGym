@@ -90,6 +90,8 @@ const flavor = {
 
 // The version people are asked for in #install-help and on every bug report. Read from
 // package.json so it cannot drift from the release it was built in, and inlined at build
+// The version people are asked for in #install-help and on every bug report. Read from
+// package.json so it cannot drift from the release it was built in, and inlined at build
 // time so no runtime fetch is involved.
 //
 // APP_BUILD, when the build sets it, is appended as "1.3.8+<build>". A packaged build carries a
@@ -99,6 +101,10 @@ const flavor = {
 // nothing: the string is exactly package.json's version.
 const pkgVersion = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version
 const appVersion = process.env.APP_BUILD ? `${pkgVersion}+${process.env.APP_BUILD}` : pkgVersion
+
+// Absolute path to the test-only dataset, for the one alias an importer spells as an
+// absolute path (scripts/*.mjs and mcp/ reach into frontend/src/lib).
+const pathToTestData = () => fileURLToPath(new URL('./src/lib/exercises-test-data.js', import.meta.url))
 
 export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(appVersion) },
@@ -116,5 +122,24 @@ export default defineConfig({
       } : {})
     }
   },
-  build: { chunkSizeWarningLimit: 1500 }
+  build: { chunkSizeWarningLimit: 1500 },
+  // The app ships the pruned catalogue (the owner's 19 exercises, see
+  // scripts/catalogue/prune.mjs), but the test suite was written against the full one: its
+  // fixtures name a barbell lift for the 2.5 kg step, a leverage machine for the
+  // assisted-load rule, cardio for time-and-speed logging. Under test — and only under
+  // test — exercises-data.js resolves to exercises-test-data.js, the app catalogue plus
+  // those fixtures (scripts/build-test-catalogue.mjs). Production code is untouched and
+  // the bundle still ships 19.
+  ...(process.env.VITEST
+    ? {
+        resolve: {
+          alias: [
+            { find: /^\.\/exercises-data\.js$/, replacement: './exercises-test-data.js' },
+            { find: /^\.\/lib\/exercises-data\.js$/, replacement: './lib/exercises-test-data.js' },
+            { find: /^\.\.\/lib\/exercises-data\.js$/, replacement: '../lib/exercises-test-data.js' },
+            { find: /frontend\/src\/lib\/exercises-data\.js$/, replacement: pathToTestData() },
+          ]
+        }
+      }
+    : {})
 })

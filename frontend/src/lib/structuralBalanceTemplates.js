@@ -126,7 +126,11 @@ export const TEMPLATES = {
         id: 'squat',
         label: 'Squat (anchor)',
         evaluationMode: EVALUATION_MODES.LOAD_RATIO,
-        exerciseIds: ['0043', '1436'],
+        // The barbell lifts are the anchor, and the dumbbell equivalents count too: a plan
+        // built on goblet squats and dumbbell benches is a powerlifting plan with different
+        // equipment, and the ratios only mean something if both ends of them are the same
+        // person's numbers.
+        exerciseIds: ['0043', '1436', '1760', '2323'],
         targetPct: 100,
       },
       {
@@ -134,7 +138,7 @@ export const TEMPLATES = {
         label: 'Bench press',
         evaluationMode: EVALUATION_MODES.LOAD_RATIO,
         anchorRoleId: 'squat',
-        exerciseIds: ['0025'],
+        exerciseIds: ['0025', '0289', '0314'],
         targetPct: 75,
       },
       {
@@ -142,7 +146,7 @@ export const TEMPLATES = {
         label: 'Deadlift',
         evaluationMode: EVALUATION_MODES.LOAD_RATIO,
         anchorRoleId: 'squat',
-        exerciseIds: ['0032'],
+        exerciseIds: ['0032', '0085', '1459'],
         targetPct: 120,
       },
       {
@@ -164,7 +168,7 @@ export const TEMPLATES = {
         id: 'romanianDeadlift',
         label: 'Romanian deadlift (12 reps)',
         evaluationMode: EVALUATION_MODES.BODYWEIGHT_RATIO,
-        exerciseIds: ['0085'],
+        exerciseIds: ['0085', '1459'],
         targetPct: 100,
         targetPctFemale: 80,
         reps: 12,

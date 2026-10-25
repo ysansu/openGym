@@ -6,11 +6,17 @@ import { modeOf } from './history.js'
 import { emptyMeasurement } from './measurements.js'
 
 // Starting weight and weekly increment per exercise of the starter plan (kg).
-// Chest dips are body-weight only here, so they log reps at 0 added weight.
+// The catalogue is pruned to the owner's 19 exercises, so the demo's progression table is
+// keyed by those ids. Body-weight exercises (chest dip, hanging leg raise, the stretches)
+// log reps at 0 added weight, which is what the 0 increment expresses.
 const PROG = {
-  '0025': [60, 1.25], '0047': [45, 1], '0426': [20, 0.5], '0334': [10, 0.25], '0241': [25, 0.75], '0251': [0, 0],
-  '2330': [50, 1.25], '0027': [50, 1], '1323': [45, 1], '0031': [30, 0.5], '0313': [12, 0.3],
-  '0043': [70, 1.5], '0085': [60, 1.25], '0739': [120, 3], '0585': [45, 1], '0586': [40, 1], '0605': [60, 1.5]
+  // Push Day
+  '4580': [0, 0], '4395': [0, 0], '0289': [20, 1.25], '0251': [0, 0], '1269': [15, 1],
+  '0314': [16, 1], '3342': [8, 0.5], '4151': [14, 0.75],
+  // Pull Day
+  '1204': [18, 1], '2330': [40, 1.25], '0861': [35, 1.25], '0218': [35, 1.25], '0868': [20, 0.75],
+  // Leg Day
+  '1760': [24, 1.5], '2290': [20, 1.25], '1459': [20, 1.25], '1757': [16, 1], '0472': [0, 0],
 }
 const WEEKS = 12                       // how much history to fabricate
 const BW_FROM = 82.4, BW_TO = 78.3     // body-weight trend across those weeks
@@ -29,10 +35,10 @@ const weekTarget = wk =>
       : 2.6 - (wk - DELOAD_WEEK - 1) * 0.26
 // Leg day is trained further from failure than the upper body — deliberate, so the muscle
 // map's "hard sets" mode shows a different picture from its all-sets mode.
-const EASY = new Set(['0043', '0085', '0739', '0585', '0586'])
+const EASY = new Set(['1760', '1459', '1757'])
 // One exercise nobody ever rates: partial coverage is the normal case (rating is optional and
 // off by default), and it shows the per-exercise Effort toggle correctly staying away.
-const NEVER_RATED = '0605'
+const NEVER_RATED = '0472'
 const UNRATED = 0.1                    // …plus this share of the remaining sets, at random
 // The first weeks are logged in RPE, as if they came out of another app before the profile
 // switched to RIR. A set is never rewritten (see history.js), so the stats have to average a

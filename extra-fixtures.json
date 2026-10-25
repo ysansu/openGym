@@ -1,0 +1,7 @@
+{
+  "_comment": "Exercises a test finds by searching or walking the catalogue rather than by naming its id, so restore-test-fixtures.mjs (which only scans for 'NNNN' literals) does not pick them up. Listed here explicitly so the set stays complete and the reason is visible.",
+  "1197": "search-typo.test.js expects first('sqat') to be 'squat' — the plain squat, not a dumbbell squat",
+  "0662": "search-typo.test.js expects first('push ups') to be 'push-up'",
+  "0652": "search-typo.test.js expects first('pull ups') to be 'pull-up'",
+  "1160": "search-typo.test.js expects first('burpee') to be 'burpee'"
+}

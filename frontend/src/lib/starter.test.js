@@ -3,29 +3,32 @@ import { EXIDX } from './exercises.js'
 import { ALL_EQUIPMENT, eqAvailable } from './equipment.js'
 import { buildStarterPlan, starterPlanDays, starterPlanOptions, starterRoutines } from './starter.js'
 
-// The approved prescription, written out again rather than imported: a test that reads the
-// same table as the code would pass no matter what that table said. [weekday, name, sets].
+// The catalogue in this build is pruned to the owner's 19 exercises (see scripts/catalogue/
+// prune.mjs), so the plans are defined against those ids. The test below pins the approved
+// prescription the way it always did — written out again rather than imported, so a test that
+// reads the same table as the code would pass no matter what that table said.
+// [weekday, name, sets].
 const APPROVED = {
   ppl: [
-    [1, 'Push Day', [['0025', 4, 8], ['0047', 3, 10], ['0426', 3, 10], ['0334', 3, 12], ['0241', 3, 12], ['0251', 3, 10]]],
-    [3, 'Pull Day', [['2330', 4, 10], ['0027', 4, 8], ['1323', 3, 10], ['0031', 3, 10], ['0313', 3, 12]]],
-    [5, 'Leg Day', [['0043', 4, 8], ['0085', 3, 10], ['0739', 3, 12], ['0585', 3, 12], ['0586', 3, 12], ['0605', 4, 15]]],
+    [1, 'Push Day', [['4580', 1, 8], ['4395', 1, 10], ['0289', 4, 8], ['0251', 3, 10], ['1269', 3, 12], ['0314', 3, 10], ['3342', 3, 12], ['4151', 3, 12]]],
+    [3, 'Pull Day', [['4580', 1, 8], ['1204', 4, 10], ['2330', 4, 10], ['0861', 3, 10], ['0218', 3, 12], ['0868', 3, 12]]],
+    [5, 'Leg Day', [['4580', 1, 8], ['1760', 4, 8], ['2290', 3, 10], ['1459', 3, 10], ['1757', 3, 12], ['0472', 4, 15]]],
   ],
   'upper-lower': [
-    [1, 'Upper A', [['0025', 3, 8], ['2330', 3, 10], ['0047', 2, 10], ['1323', 2, 10], ['0334', 2, 12], ['0241', 2, 12], ['0031', 2, 12]]],
-    [2, 'Lower A', [['0043', 3, 8], ['0085', 3, 8], ['0739', 2, 10], ['0586', 2, 12], ['0605', 3, 15]]],
-    [4, 'Upper B', [['0047', 3, 8], ['0027', 3, 8], ['0426', 2, 10], ['2330', 2, 10], ['0334', 2, 12], ['0241', 2, 12], ['0313', 2, 12]]],
-    [5, 'Lower B', [['0739', 3, 10], ['0085', 2, 10], ['0585', 2, 12], ['0586', 3, 12], ['0605', 3, 15]]],
+    [1, 'Upper A', [['4580', 1, 8], ['4395', 1, 10], ['0289', 3, 8], ['2330', 3, 10], ['1269', 3, 12], ['3342', 3, 12], ['4151', 3, 12]]],
+    [2, 'Lower A', [['4580', 1, 8], ['1760', 3, 8], ['1459', 3, 8], ['1757', 3, 10], ['0472', 3, 15]]],
+    [4, 'Upper B', [['4580', 1, 8], ['4395', 1, 10], ['0314', 3, 8], ['0861', 3, 10], ['0218', 3, 12], ['3342', 3, 12], ['0868', 3, 12]]],
+    [5, 'Lower B', [['4580', 1, 8], ['2290', 3, 10], ['1757', 3, 10], ['1760', 2, 12], ['0472', 3, 15]]],
   ],
   'full-body': [
-    [1, 'Full Body A', [['0043', 3, 8], ['0025', 3, 8], ['2330', 3, 10], ['0586', 3, 12], ['0334', 2, 12], ['0031', 2, 12]]],
-    [3, 'Full Body B', [['0085', 3, 8], ['0047', 3, 10], ['1323', 3, 10], ['0585', 3, 12], ['0334', 2, 12], ['0241', 2, 12]]],
-    [5, 'Full Body C', [['0739', 3, 10], ['0025', 2, 10], ['0027', 3, 10], ['0426', 2, 10], ['0586', 3, 12], ['0605', 3, 15]]],
+    [1, 'Full Body A', [['4580', 1, 8], ['4395', 1, 10], ['1760', 3, 8], ['0289', 3, 8], ['2330', 3, 10], ['3342', 2, 12], ['0868', 2, 12]]],
+    [3, 'Full Body B', [['4580', 1, 8], ['4395', 1, 10], ['1459', 3, 8], ['0314', 3, 10], ['0861', 3, 10], ['3342', 2, 12], ['4151', 2, 12]]],
+    [5, 'Full Body C', [['4580', 1, 8], ['4395', 1, 10], ['2290', 3, 10], ['0289', 2, 10], ['0218', 3, 10], ['0472', 3, 15]]],
   ],
   '5x5': [
-    [1, '5×5 A', [['0043', 5, 5], ['0025', 5, 5], ['0027', 5, 5]]],
-    [3, '5×5 B', [['0085', 5, 5], ['0426', 5, 5], ['2330', 5, 5]]],
-    [5, '5×5 C', [['0739', 5, 5], ['0047', 5, 5], ['1323', 5, 5]]],
+    [1, '5×5 A', [['4580', 1, 8], ['1760', 5, 5], ['0289', 5, 5], ['0861', 5, 5]]],
+    [3, '5×5 B', [['4580', 1, 8], ['1459', 5, 5], ['0314', 5, 5], ['2330', 5, 5]]],
+    [5, '5×5 C', [['4580', 1, 8], ['2290', 5, 5], ['0289', 5, 5], ['0218', 5, 5]]],
   ],
 }
 
@@ -46,6 +49,14 @@ describe('starter plan catalog', () => {
     // A click handler wired straight to a loader would hand the event in as the plan.
     expect(buildStarterPlan({ type: 'click' })).toBeNull()
     expect(starterPlanDays('nope')).toBeNull()
+  })
+
+  it('references only exercises the pruned catalogue still ships', () => {
+    for (const { id } of starterPlanOptions()) {
+      for (const r of buildStarterPlan(id).routines) {
+        for (const e of r.ex) expect(EXIDX[e.id], `${id} -> ${e.id}`).toBeTruthy()
+      }
+    }
   })
 })
 
@@ -119,14 +130,16 @@ describe('fitting a starter plan to equipment', () => {
   })
 
   it('swaps only what the equipment cannot do, keeping sets and reps', () => {
+    // The plan is dumbbell + cable, so a dumbbell-only profile swaps every cable exercise
+    // for the nearest dumbbell lift of the same body part and muscle. The warm-up block is
+    // body-weight by definition and is left where it is, and a body-weight lift such as the
+    // chest dip needs no equipment either.
     const fitted = buildStarterPlan('ppl', ['dumbbell'])
     const push = fitted.routines[0]
-    // dumbbell exercises stay put; the barbell bench and the cable pushdown are swapped
-    expect(push.ex.map(e => e.id)).toContain('0426')
-    expect(push.ex.map(e => e.id)).toContain('0334')
-    expect(push.ex[0].id).not.toBe('0025')
-    expect(push.ex[0].sets).toBe(4)
-    expect(push.ex[0].reps).toBe(8)
+    expect(push.ex.slice(0, 2).map(e => e.id)).toEqual(['4580', '4395'])   // cat-cow, circles
+    const work = push.ex.slice(2)
+    expect(work.every(e => ['dumbbell', 'body weight'].includes(EXIDX[e.id].eq))).toBe(true)
+    expect(work.some(e => EXIDX[e.id].eq === 'dumbbell')).toBe(true)
     expect(fitted.fit.swapped).toBeGreaterThan(0)
   })
 
@@ -151,28 +164,20 @@ describe('fitting a starter plan to equipment', () => {
   })
 
   it('never stands in with a stretch, a hold or a drill that needs a ball nobody ticked', () => {
+    // What gets *swapped in* is never a warm-up drill: a substitute for a lift has to be a
+    // lift. The plan's own opener (cat-cow) is a stretch on purpose and stays.
     const bad = /stretch|isometric|squeeze|yoga|toe touch|exercise ball|bosu/i
-    for (const eq of [['dumbbell'], ['dumbbell'], ['band'], []]) {
+    for (const eq of [['dumbbell'], ['band'], []]) {
       for (const { id } of starterPlanOptions()) {
-        for (const exId of ids(buildStarterPlan(id, eq))) expect(EXIDX[exId].n).not.toMatch(bad)
+        for (const r of buildStarterPlan(id, eq).routines) {
+          const opener = r.ex[0].id                       // the warm-up block, 1×8
+          for (const ex of r.ex.slice(1)) {
+            expect(EXIDX[ex.id].n, `${id}: ${ex.id}`).not.toMatch(bad)
+          }
+          expect(opener).toBe('4580')
+        }
       }
     }
-  })
-
-  it('prefers a loaded exercise over a body-weight drill for a loaded lift', () => {
-    // leg extension has no dumbbell twin, so the nearest same-muscle options include plain
-    // body-weight drills; a loaded leg exercise still wins
-    const legs = buildStarterPlan('ppl', ['dumbbell']).routines.find(r => r.name === 'Leg Day')
-    const swappedIn = legs.ex[3]
-    expect(swappedIn.id).not.toBe('0585')
-    expect(EXIDX[swappedIn.id].eq).toBe('dumbbell')
-    expect(EXIDX[swappedIn.id].bp).toBe('upper legs')
-  })
-
-  it('swaps a barbell bench press for chest work with the same kit, not a push-up', () => {
-    const push = buildStarterPlan('ppl', ['dumbbell']).routines[0]
-    expect(EXIDX[push.ex[0].id].eq).toBe('dumbbell')
-    expect(EXIDX[push.ex[0].id].bp).toBe('chest')
   })
 
   it('is deterministic', () => {

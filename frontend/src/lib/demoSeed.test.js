@@ -41,9 +41,10 @@ describe('demo seed — effort', () => {
     const rated = {}
     eachSet((s, w, e) => { rated[e.id] = (rated[e.id] || 0) + (rirOf(s) != null ? 1 : 0) })
     const ids = Object.keys(rated)
-    expect(ids.filter(id => rated[id] === 0)).toEqual(['0605'])
+    // The hanging leg raise: a body-weight hold the demo never rates.
+    expect(ids.filter(id => rated[id] === 0)).toEqual(['0472'])
     // …while the rest carry enough rated sessions for a curve of their own (needs 3).
-    ids.filter(id => id !== '0605').forEach(id => {
+    ids.filter(id => id !== '0472').forEach(id => {
       const sessions = S.workouts.filter(w => {
         const en = w.entries.find(e => e.id === id)
         return en && avgRir(en.sets.filter(s => s.done)) != null
@@ -115,10 +116,10 @@ describe('demo seed — effort', () => {
 // on the frontend side of the boundary, where the seed actually lives.
 describe('demo seed — the training stream is a fixture', () => {
   const TODAY = '2026-07-27'                 // Monday, matching the mcp suite's pinned clock
-  // Not copied off a run: 18412.5 is the sum of w×r over the twenty completed sets of the newest
-  // session, and 78.3 is BW_TO, the end of the body-weight trend. Same two values mcp asserts.
-  const NEWEST = { d: '2026-07-24', name: 'Leg Day', vol: 18412.5 }
-  const LATEST_BW = { d: TODAY, w: 78.3 }
+  // Not copied off a run: 4190 is the sum of w×r over the twenty-one completed sets of the
+  // newest session, and 78.6 is the last weigh-in the trend lands on. Same two values mcp asserts.
+  const NEWEST = { d: '2026-07-27', name: 'Push Day', vol: 4190 }
+  const LATEST_BW = { d: TODAY, w: 78.6 }
   let D = null
 
   beforeAll(() => {
@@ -135,7 +136,7 @@ describe('demo seed — the training stream is a fixture', () => {
     const w = D.workouts.at(-1)
     expect({ d: w.d, name: w.name, vol: w.vol }).toEqual(NEWEST)
     const sets = w.entries.flatMap(e => e.sets)
-    expect(sets.length).toBe(20)
+    expect(sets.length).toBe(21)
     expect(sets.every(s => s.done)).toBe(true)
     // …and the volume really is the sum of w×r over them, not a number that drifted into place.
     expect(sets.reduce((n, s) => n + s.w * s.r, 0)).toBe(NEWEST.vol)
