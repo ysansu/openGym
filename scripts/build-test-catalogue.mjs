@@ -200,3 +200,11 @@ console.log(`i18n packs rewritten: ${changed}`)
 // so a build never sees them: stage-media.mjs reads catalogue/media only, and what ships is
 // the app's own 19 exercises and nothing else.
 console.log(`\nwrote ${path.relative(ROOT, OUT)}`)
+
+// The server side reads the same catalogue (api/coach/core/library-data.js), and
+// coach.test.js checks the two runtimes agree field for field — so the Coach's copy of the
+// test dataset is refreshed here, from the same exercises this script just wrote.
+{
+  const { execFileSync } = await import('node:child_process')
+  execFileSync(process.execPath, [path.join(ROOT, 'scripts/build-coach-assets.mjs'), '--test'], { stdio: 'inherit' })
+}

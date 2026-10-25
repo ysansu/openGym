@@ -30,3 +30,15 @@ frontend/bundle-size.json
 
 # Local planning notes
 docs/superpowers/plans/
+
+# The pruned catalogue's working set (scripts/catalogue/prune.mjs):
+#   catalogue/exercises-archive/  what the prune moved aside — recoverable, never shipped
+#   catalogue/test-fixtures/      the exercises the test suite needs (gitignored: upstream
+#                                 data kept for the tests, not part of the app's catalogue)
+#   catalogue/media-fixtures/     their stills and animations
+#   exports/                      .ogex files written by scripts/export-exercises.mjs
+catalogue/exercises-archive/
+catalogue/test-fixtures/
+catalogue/media-fixtures/
+exports/
+
