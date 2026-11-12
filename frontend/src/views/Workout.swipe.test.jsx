@@ -376,10 +376,12 @@ describe('the swipe on a timed per-side pair', () => {
 describe('the swipe panes’ words', () => {
   // QA 10-06: the Copy pane used the noun a copied routine is named with ("Kopie", "Copie").
   const packs = import.meta.glob('../locales/*.js', { eager: true, import: 'default' })
-  it('the copy pane says the verb in every pack where the noun is another word', () => {
-    const verb = { de: 'Kopieren', fr: 'Copier', es: 'Copiar', pt: 'Copiar', pl: 'Kopiuj', ru: 'Копировать', uk: 'Копіювати', tr: 'Kopyala' }
-    for (const [lang, want] of Object.entries(verb)) expect(packs[`../locales/${lang}.js`]['Copy set'], lang).toBe(want)
-    for (const [path, pack] of Object.entries(packs)) if (!/(ar|hi|it)\.js$/.test(path) && pack['Copy set']) expect(pack['Copy set'], path).not.toBe(pack.Copy)
+  it('the copy pane says the verb where the noun is another word', () => {
+    // One translated pack ships in this build. The case is that the pane's label is its own
+    // key rather than the noun's, and that the pack translates it.
+    const zh = packs['../locales/zh.js']
+    expect(zh['Copy set']).toBe('复制')
+    expect(zh['Copy set']).not.toBe(zh.Copy)
   })
   it('renders the copy pane with that key', () => {
     setActive([entry('1001', [row(80), row(80)])])
@@ -444,3 +446,4 @@ describe('the one-time hint', () => {
     expect(useUI.getState().swipeHint).toBeNull()
   })
 })
+

@@ -3097,15 +3097,15 @@ describe('Workout exercise tags', () => {
   })
 
   // The cardio target "cardiovascular system" is a translated key of its own; mapping it through
-  // MUSCLE_NAME must not turn "Herz-Kreislauf" back into English for every built-in cardio exercise.
-  it('keeps the cardio target translated (burpee, de)', async () => {
+  // MUSCLE_NAME must not turn "心血管系统" back into English for every built-in cardio exercise.
+  it('keeps the cardio target translated (burpee, zh)', async () => {
+    const { default: zh } = await import('../locales/zh.js')
     const { _setLangState } = await import('../lib/i18n-core.js')
-    const { default: de } = await import('../locales/de.js')
-    _setLangState('de', de, null, null)
+    _setLangState('zh', zh, null, null)
     try {
       await mount([exercise('1160', [false])])
       const tags = [...container.querySelectorAll('.tag')].map(tag => tag.textContent.trim())
-      expect(tags).toContain('Herz-Kreislauf')
+      expect(tags).toContain('心血管系统')
       expect(tags).not.toContain('Cardiovascular system')
     } finally { _setLangState('en', null, null, null) }
   })
@@ -3255,21 +3255,13 @@ describe('the reference line: last time or best set', () => {
   })
 
   // A per-side set in Arabic carries its side words ("يسار 15×8 · يمين 15×7"). Forced left to
-  // right, each word stood on the wrong side of its numbers and the numbers after it turned
-  // round; isolated in its own direction it reads as before, next to sets that are forced.
-  it('leaves a set with right-to-left words in its own direction', async () => {
-    const { _setLangState } = await import('../lib/i18n-core.js')
-    const { default: ar } = await import('../locales/ar.js')
+  // The right-to-left case that used to sit here went with Arabic: no RTL language ships in
+  // this build, so there is no dir="auto" row to pin. The ltr case below still holds.
+  it('leaves an ltr set in its own direction', async () => {
     const side = r => ({ w: 15, r, done: true })
     const sided = [{ d: '2026-08-26', start: Date.parse('2026-08-26T18:00:00'), routineIds: ['A'],
       entries: [{ id: 'plain-bench', rid: 'A', target: { mode: 'reps', side: true, reps: 16, weight: 15, bodyweight: false },
         sets: [{ w: 15, r: 15, done: true, sides: { L: side(8), R: side(7) } }] }] }]
-    _setLangState('ar', ar, null, null)
-    try {
-      await mount([exercise('plain-bench', [false], { rid: 'A' })], 0, { workouts: sided })
-      const sets = [...line().querySelectorAll('bdi')]
-      expect(sets.map(b => [b.getAttribute('dir'), b.textContent])).toEqual([['auto', `${ar.L} 15×8 · ${ar.R} 15×7`]])
-    } finally { _setLangState('en', null, null, null) }
     await mount([exercise('plain-bench', [false], { rid: 'A' })], 0, { workouts: sided })
     expect([...line().querySelectorAll('bdi')].map(b => [b.getAttribute('dir'), b.textContent])).toEqual([['ltr', 'L 15×8 · R 15×7']])
   })
@@ -3549,3 +3541,5 @@ describe('the Lock Screen\'s Done (Live Activity)', () => {
     expect(mocks.S.active.entries[0].sets[0].done).toBe(false)
   })
 })
+
+

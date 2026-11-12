@@ -336,17 +336,17 @@ describe('Home — the today row follows today\'s plan, not just the last sessio
 
 describe('Home: your own loop', () => {
   // QA round 2 (2026-10-06): the loop's name was saved as text in the language it was made in, so
-  // a loop made in English still read "Rotation" after switching to Arabic.
+  // a loop made in English still read "Rotation" after switching to another language.
   it('is called Rotation in the language on screen, whatever an older save kept as its name', async () => {
     const rot = { id: 'rot', sequence: ['d1', 'd2'], label: 'Rotation' }
     try {
-      await setLang('ar')
+      await setLang('zh')
       setS({ rotation: rot, scheduleMode: 'rotation', queue: queue({ ids: ['d1', 'd2'], label: 'Rotation', rotationId: 'rot' }) })
       mount()
-      expect(host.querySelector('.queue .row .small').textContent).toBe('التناوب')
+      expect(host.querySelector('.queue .row .small').textContent).toBe('轮换')
       setS({ rotation: { ...rot, label: '' }, scheduleMode: 'rotation', queue: queue({ ids: ['d1', 'd2'], label: '', rotationId: 'rot' }) })
       mount()
-      expect(host.querySelector('.queue .row .small').textContent).toBe('التناوب')
+        expect(host.querySelector('.queue .row .small').textContent).toBe('轮换')
     } finally { await act(() => setLang('en')) }
     // A coach's week keeps the name its planner gave it.
     setS()

@@ -3,38 +3,40 @@
 // (import.meta.glob lazy
 // loads, the React subscription hook) live in i18n.js and re-export from here.
 
+// This build speaks English and Simplified Chinese. The other sixteen locales openGym
+// upstream ships were removed along with their catalogue translation packs: every exercise
+// carried a name, description and instruction set in eighteen languages, which made the
+// repository a maze of near-duplicate files for a personal, single-language install.
+//
+// Adding one back is a known, mechanical job: drop the pack into src/locales/ (and the
+// catalogue's rows into catalogue/i18n/), then add the code here plus its entry in
+// DATE_LOCALES below. `check-locales.mjs` and locale-coverage.test.js keep the two lists and
+// the files agreeing, so a half-restored language fails the build rather than shipping blank.
 export const LANGS = {
-  en: 'English', de: 'Deutsch', 'de-CH': 'Deutsch (Schweiz)', es: 'Español', fr: 'Français',
-  it: 'Italiano', pt: 'Português (Portugal)', 'pt-BR': 'Português (Brasil)', pl: 'Polski',
-  tr: 'Türkçe', ru: 'Русский', uk: 'Українська', zh: '简体中文', 'zh-TW': '繁體中文',
-  ko: '한국어', hi: 'हिन्दी', bn: 'বাংলা', th: 'ไทย', hu: 'Magyar', ar: 'العربية'
+  en: 'English',
+  zh: '简体中文',
 }
 // Languages with exercise instructions / names, generated from catalogue/i18n by
 // scripts/catalogue/build.mjs. A pack can be partial; what it lacks shows in English.
 import { INSTR_LANGS, EXERCISE_NAME_LANGS } from './catalogue-langs.js'
 export { INSTR_LANGS, EXERCISE_NAME_LANGS }
 // Languages rendered right-to-left; i18n.js setLang applies the direction from this.
-export const RTL_LANGS = new Set(['ar'])
+// Empty now that Arabic is gone; the mechanism stays, because the flag is what a future
+// right-to-left language would need and removing it would mean re-deriving the direction.
+export const RTL_LANGS = new Set()
 export const DATE_LOCALES = {
-  en: 'en-GB', de: 'de-DE', 'de-CH': 'de-CH', es: 'es-ES', fr: 'fr-FR', it: 'it-IT',
-  pt: 'pt-PT', 'pt-BR': 'pt-BR',
-  pl: 'pl-PL', tr: 'tr-TR', ru: 'ru-RU', uk: 'uk-UA', zh: 'zh-CN', 'zh-TW': 'zh-TW', ko: 'ko-KR', hi: 'hi-IN', bn: 'bn-BD-u-nu-latn', th: 'th-TH', hu: 'hu-HU', ar: 'ar-u-nu-latn'
+  en: 'en-GB',
+  zh: 'zh-CN',
 }
 
 // Locales derived from another language by a pure text transform rather than carried as their
-// own pack. Swiss Standard German has no ß — every one is written ss — so de-CH is de with a
-// single substitution. Deriving it keeps one German source of truth: a hand-maintained de-CH
-// would be 98.7% identical to de.js (16 of 1265 values differ), and check-locales.mjs would
-// then require every future German string to be written twice, forever.
+// own pack.
 //
-// The transform is exact in this direction ONLY. Going back needs vowel length — "Maße" and
-// "Masse" both collapse to "Masse" — so de is always the base and never the derivative.
-//
-// Note this covers orthography, not vocabulary: a Swiss-specific word choice (Velo for
-// Fahrrad) would need a real pack. None of the current strings contain one.
-export const DERIVED_LOCALES = {
-  'de-CH': { base: 'de', transform: s => s.replace(/ß/g, 'ss') }
-}
+// Empty now: Swiss Standard German (de-CH) was the only one, derived from de by writing ß as
+// ss, and both languages are gone. The mechanism stays because it is what a second orthography
+// of a language this build does ship would use, and `derivePack` below is a no-op for an
+// unknown locale — so a language added back without a derivation costs nothing.
+export const DERIVED_LOCALES = {}
 
 // The language whose packs a locale actually loads: a derived locale reads its base's, every
 // other language its own. Used for the INSTR_LANGS/EXERCISE_NAME_LANGS membership tests too,
@@ -223,7 +225,7 @@ export const exerciseNameFor = ex => {
 // the English names ("supino com barra"). Left without the title-casing English gets, those
 // read all lower-case in every list, card and history row. A new pack goes here only when it
 // carries real casing; i18n-core.test.js checks this list against the packs themselves.
-export const CASED_NAME_LANGS = ['de']
+export const CASED_NAME_LANGS = []
 
 // EXDB stores English names lower-case and the UI title-cases them with CSS. A pack in
 // CASED_NAME_LANGS carries its own casing and must not be cased again on top, so the class that

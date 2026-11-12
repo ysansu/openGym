@@ -1,8 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { exerciseNameText } from './format.js'
 import { _setLangState } from './i18n-core.js'
-import de from '../exercise-names/de.js'
-import es from '../exercise-names/es.js'
+import zh from '../exercise-names/zh.js'
 
 // A toast, a dialog title, the timed-set label and the Stats picker show an exercise name as
 // plain text, with no element to carry the CSS title-casing. They have to come out cased the way
@@ -17,14 +16,16 @@ describe('exerciseNameText', () => {
     expect(exerciseNameText(custom)).toBe('My Own Press')
   })
 
-  it('title-cases a name from a lower-case pack, the English one in parentheses included', () => {
-    _setLangState('es', {}, null, es)
-    expect(exerciseNameText(bench)).toBe('Press De Banca Con Barra (Barbell Bench Press)')
+  it('title-cases a name from a translated pack, the English one in parentheses included', () => {
+    _setLangState('zh', {}, null, zh)
+    expect(exerciseNameText(bench)).toBe('杠铃卧推 (Barbell Bench Press)')
   })
 
-  it('leaves German as the pack writes it', () => {
-    _setLangState('de', {}, null, de, false)
-    expect(exerciseNameText(bench)).toBe('Bankdrücken mit Langhantel')
+  it('leaves a pack that carries its own casing as the pack writes it', () => {
+    // CASED_NAME_LANGS is empty in this build (German was its only entry), so no pack takes
+    // this branch today; the switch is still what the function must honour when one does.
+    _setLangState('zh', {}, null, zh, false)
+    expect(exerciseNameText(bench)).toBe('杠铃卧推')
   })
 })
 

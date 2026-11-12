@@ -62,14 +62,10 @@ describe('a language picked after coach-api.js loaded', () => {
     expect(getLang()).toBe('en')
     expect(JOB_ERRORS.unprivileged).toBe(EN.JOB_ERRORS.unprivileged)
 
-    await setLang('de')
-    expect(JOB_ERRORS.unprivileged).toBe(PACKS.de[EN.JOB_ERRORS.unprivileged])
-    expect(jobErrorText('timeout', 'gave up after 10 min')).toBe(PACKS.de[EN.JOB_ERRORS.timeout])
-
-    await setLang('pt-BR')
-    expect(JOB_ERRORS.unprivileged).toBe(PACKS['pt-BR'][EN.JOB_ERRORS.unprivileged])
-    expect(jobErrorText('meteor')).toBe(PACKS['pt-BR'][EN.JOB_ERRORS.internal])
-    expect(jobErrorText('meteor')).not.toBe(PACKS.pt[EN.JOB_ERRORS.internal])   // Brazil's own line, not Portugal's
+    await setLang('zh')
+    expect(JOB_ERRORS.unprivileged).toBe(PACKS['zh'][EN.JOB_ERRORS.unprivileged])
+    expect(jobErrorText('timeout', 'gave up after 10 min')).toBe(PACKS['zh'][EN.JOB_ERRORS.timeout])
+    expect(jobErrorText('meteor')).toBe(PACKS['zh'][EN.JOB_ERRORS.internal])
 
     await setLang('en')
     expect(JOB_ERRORS.unprivileged).toBe(EN.JOB_ERRORS.unprivileged)
@@ -79,11 +75,11 @@ describe('a language picked after coach-api.js loaded', () => {
   it('reaches the own-key phone lines, with the provider detail still attached', async () => {
     mocks.MOBILE = true
     mocks.coachLocal = { mode: 'byok' }
-    await setLang('fr')
-    expect(jobErrorText('provider', 'quota exceeded')).toBe(PACKS.fr[EN.BYOK_ERRORS.provider] + '\nquota exceeded')
+    await setLang('zh')
+    expect(jobErrorText('provider', 'quota exceeded')).toBe(PACKS['zh'][EN.BYOK_ERRORS.provider] + '\nquota exceeded')
     // A class the phone has no line of its own for falls back to the shared one, translated too.
-    expect(jobErrorText('restart')).toBe(PACKS.fr[EN.JOB_ERRORS.restart])
-    expect(jobErrorText(undefined)).toBe(PACKS.fr[EN.BYOK_ERRORS.internal])
+    expect(jobErrorText('restart')).toBe(PACKS['zh'][EN.JOB_ERRORS.restart])
+    expect(jobErrorText(undefined)).toBe(PACKS['zh'][EN.BYOK_ERRORS.internal])
   })
 })
 

@@ -3,7 +3,7 @@ import { canMoveActiveWorkoutUnit, moveActiveWorkoutUnit, canMoveActiveWorkoutEn
 import { supersetFlowStep } from './supersetFlow.js'
 import { supersetUnits } from './history.js'
 import { LANGS, DERIVED_LOCALES } from './i18n-core.js'
-import { PT_BR_OVERRIDES } from '../locales/pt-BR.js'
+import zh from '../locales/zh.js'
 
 const entry = (id, extra = {}) => ({
   id,
@@ -189,7 +189,7 @@ describe('active workout move locale coverage', () => {
         expect(pack[key].trim(), `${code} has a blank ${key}`).not.toBe('')
       }
     }
-    expect(Object.hasOwn(PT_BR_OVERRIDES, 'Move up')).toBe(true)
-    expect(Object.hasOwn(PT_BR_OVERRIDES, 'Move down')).toBe(true)
+    expect(Object.hasOwn(zh, 'Move up')).toBe(true)
+    expect(Object.hasOwn(zh, 'Move down')).toBe(true)
   })
 })

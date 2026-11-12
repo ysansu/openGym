@@ -1,8 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { fmtAgo, fmtDaysAgo, changeCount, setsWorkCount, fmtDur, fmtDate } from './format.js'
 import { _setLangState } from './i18n-core.js'
-import ar from '../locales/ar.js'
-import uk from '../locales/uk.js'
+import zh from '../locales/zh.js'
 
 // "Last synced: …" in Settings — the platform words it, in the UI language (en-GB here).
 describe('fmtAgo', () => {
@@ -38,9 +37,11 @@ describe('setsWorkCount', () => {
   })
 
   it('and the packs carry it', () => {
-    _setLangState('uk', uk, null, null)
-    expect(setsWorkCount(1, 1)).toBe(uk['{0} set · {1} work'].replace('{0}', '1').replace('{1}', '1'))
-    expect(uk['{0} set · {1} work']).not.toBe(uk['{0} sets · {1} work'])
+    _setLangState('zh', zh, null, null)
+    // Chinese has no plural form, so both keys read the same; what matters is that the pack's
+    // own string is what comes out, not the English one.
+    expect(setsWorkCount(1, 1)).toBe(zh['{0} set · {1} work'].replace('{0}', '1').replace('{1}', '1'))
+    expect(zh['{0} set · {1} work']).toMatch(/[\u4e00-\u9fff]/)
   })
 })
 
@@ -55,12 +56,9 @@ describe('fmtDur', () => {
   })
 
   it('uses each pack\'s own units', () => {
-    _setLangState('ar', ar, null, null)
-    expect(fmtDur(34 * 60000)).toBe('34 دقيقة')
-    expect(fmtDur(65 * 60000)).toBe('1 ساعة 5 دقيقة')
-    _setLangState('uk', uk, null, null)
-    expect(fmtDur(34 * 60000)).toBe('34 хв')
-    expect(fmtDur(65 * 60000)).toBe('1 год 5 хв')
+    _setLangState('zh', zh, null, null)
+    expect(fmtDur(34 * 60000)).toBe('34 分钟')
+    expect(fmtDur(65 * 60000)).toBe('1 小时 5 分钟')
   })
 })
 
@@ -106,9 +104,11 @@ describe('fmtDaysAgo', () => {
   })
 
   it('in the UI language, from the platform', () => {
-    _setLangState('de', {}, null, null)
-    expect(fmtDaysAgo(back(1), day)).toBe('gestern')
-    expect(fmtDaysAgo(back(3), day)).toBe('vor 3 Tagen')
-    expect(fmtDaysAgo(back(14), day)).toBe('vor 2 Wochen')
+    // Intl.RelativeTimeFormat renders these, so the expected strings come from ICU rather than
+    // from a pack. Chinese is 'zh' -> DATE_LOCALES zh-CN.
+    _setLangState('zh', {}, null, null)
+    expect(fmtDaysAgo(back(1), day)).toBe('昨天')
+    expect(fmtDaysAgo(back(3), day)).toBe('3天前')
+    expect(fmtDaysAgo(back(14), day)).toBe('2周前')
   })
 })

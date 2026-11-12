@@ -34,40 +34,40 @@ describe('instance default language', () => {
     expect(shown()).toBe('en')   // nothing to go on before the config
     const before = clone(useStore.getState().S)
 
-    api.mockResolvedValueOnce({ invite_only: false, allow_guest: true, default_lang: 'pt-BR' })
+    api.mockResolvedValueOnce({ invite_only: false, allow_guest: true, default_lang: 'zh' })
     await useStore.getState().refreshConfig()
-    expect(shown()).toBe('pt-BR')
+    expect(shown()).toBe('zh')
     expect(useStore.getState().S).toEqual(before)
   })
 
   it('the next boot uses the default this device last saw, before the config answers', async () => {
-    nav(['de-DE'])
-    api.mockResolvedValueOnce({ invite_only: false, default_lang: 'pt-BR' })
+    nav(['zh-CN'])
+    api.mockResolvedValueOnce({ invite_only: false, default_lang: 'zh' })
     await useStore.getState().refreshConfig()
     useStore.setState({ S: freshState(), config: null })
-    expect(shown()).toBe('pt-BR')   // not the browser's German first
+    expect(shown()).toBe('zh')   // not the browser's German first
     // An instance known to have none: the browser's language at once.
     api.mockResolvedValueOnce({ invite_only: false })
     await useStore.getState().refreshConfig()
     useStore.setState({ config: null })
-    expect(shown()).toBe('de')
+    expect(shown()).toBe('zh')
   })
 
   it('without DEFAULT_LANG a fresh copy follows the browser when the app speaks it', () => {
-    nav(['de-DE', 'en'])
+    nav(['zh-CN', 'en'])
     useStore.setState({ S: freshState(), config: { invite_only: false, allow_guest: true } })
-    expect(shown()).toBe('de')
+    expect(shown()).toBe('zh')
   })
 
   it('an existing copy with lang "en" and no mark is left in English', () => {
-    nav(['de-DE'])
-    useStore.setState({ S: { ...clone(DEF), lang: 'en' }, config: { default_lang: 'pt-BR' } })
+    nav(['zh-CN'])
+    useStore.setState({ S: { ...clone(DEF), lang: 'en' }, config: { default_lang: 'zh' } })
     expect(shown()).toBe('en')
   })
 
   it('a language picked in Settings wins over DEFAULT_LANG from then on', () => {
-    useStore.setState({ S: freshState(), config: { default_lang: 'pt-BR' } })
-    expect(shown()).toBe('pt-BR')
+    useStore.setState({ S: freshState(), config: { default_lang: 'zh' } })
+    expect(shown()).toBe('zh')
     // What the Settings picker does.
     useStore.getState().update(s => { s.lang = 'en'; s.langAuto = false })
     expect(shown()).toBe('en')
@@ -76,18 +76,18 @@ describe('instance default language', () => {
   it('two devices with browsers in different languages do not push the profile back and forth', async () => {
     // Device B's browser is English; the server copy was last written from device A (German).
     nav(['en-US'])
-    const server = { ...clone(DEF), _ts: 100, lang: 'de', langAuto: true, workouts: [{ id: 'w1', d: '2026-09-01', start: 1, entries: [] }] }
+    const server = { ...clone(DEF), _ts: 100, lang: 'zh', langAuto: true, workouts: [{ id: 'w1', d: '2026-09-01', start: 1, entries: [] }] }
     useStore.setState({ S: clone(server), user: { id: 'u1' }, ready: true, config: { invite_only: false } })
     localStorage.setItem('gym_sync', JSON.stringify({ rev: 5, ts: 100 }))
     expect(shown()).toBe('en')
-    expect(useStore.getState().S.lang).toBe('de')
+    expect(useStore.getState().S.lang).toBe('zh')
 
     // The next poll: the server has not moved, and this device owes it nothing.
     api.mockResolvedValue({ state: { ...server, _rev: 5 }, rev: 5 })
     await useStore.getState().pullState()
     await useStore.getState().pullState()
     expect(puts()).toHaveLength(0)
-    expect(useStore.getState().S.lang).toBe('de')
+    expect(useStore.getState().S.lang).toBe('zh')
     expect(shown()).toBe('en')
   })
 })

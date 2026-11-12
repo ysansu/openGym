@@ -84,38 +84,38 @@ describe('matchExercise', () => {
   })
 
   it('matches translated UI terms when a language is active', () => {
-    _setLangState('pt', {
-      chest: 'peito',
-      barbell: 'barra',
-      dumbbell: 'halteres',
-      shoulders: 'ombros'
+    _setLangState('zh', {
+      chest: '胸部',
+      barbell: '杠铃',
+      dumbbell: '哑铃',
+      shoulders: '肩部'
     }, null)
 
-    // "peito" is the translated bp, "barra" is the translated eq
-    expect(matchExercise(benchPress, 'peito')).toBe(true)
-    expect(matchExercise(benchPress, 'barra')).toBe(true)
-    expect(matchExercise(benchPress, 'peito barra bench')).toBe(true)
-    expect(matchExercise(lateralRaise, 'halteres ombros')).toBe(true)
+    // "胸部" is the translated bp, "杠铃" is the translated eq
+    expect(matchExercise(benchPress, '胸部')).toBe(true)
+    expect(matchExercise(benchPress, '杠铃')).toBe(true)
+    expect(matchExercise(benchPress, '胸部 杠铃 bench')).toBe(true)
+    expect(matchExercise(lateralRaise, '哑铃 肩部')).toBe(true)
   })
 
-  // The pt-BR exercise-name pack (!16) renames the catalogue in the UI. Searching has to reach
-  // that name as well as the canonical English one, or the library goes dark for pt-BR profiles
-  // the moment they type what they see on screen.
+  // A translated exercise-name pack renames the catalogue in the UI. Searching has to reach
+  // that name as well as the canonical English one, or the library goes dark for a translated
+  // profile the moment they type what they see on screen.
   it('matches the localized exercise name as well as the English one', () => {
-    _setLangState('pt-BR', {}, null, { '0025': 'supino reto com barra' })
+    _setLangState('zh', {}, null, { '0025': '杠铃卧推' })
 
-    expect(matchExercise(benchPress, 'supino')).toBe(true)
-    expect(matchExercise(benchPress, 'supino barra')).toBe(true)
+    expect(matchExercise(benchPress, '卧推')).toBe(true)
+    expect(matchExercise(benchPress, '杠铃 卧推')).toBe(true)
     expect(matchExercise(benchPress, 'bench press')).toBe(true)   // English still reaches it
-    expect(matchExercise(lateralRaise, 'supino')).toBe(false)     // untranslated entry unaffected
+    expect(matchExercise(lateralRaise, '卧推')).toBe(false)       // untranslated entry unaffected
   })
 
   it('rebuilds the cached haystack when the language changes', () => {
-    _setLangState('pt-BR', {}, null, { '0025': 'supino reto com barra' })
-    expect(matchExercise(benchPress, 'supino')).toBe(true)
+    _setLangState('zh', {}, null, { '0025': '杠铃卧推' })
+    expect(matchExercise(benchPress, '卧推')).toBe(true)
 
     _setLangState('en', null, null, null)
-    expect(matchExercise(benchPress, 'supino')).toBe(false)
+    expect(matchExercise(benchPress, '卧推')).toBe(false)
     expect(matchExercise(benchPress, 'bench')).toBe(true)
   })
 })

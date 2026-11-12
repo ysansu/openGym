@@ -60,17 +60,17 @@ describe('the worker keeps the on-demand code too', () => {
     const bundle = {
       'assets/index-a.js': chunk('/app/frontend/src/main.jsx'),
       'assets/media-ingest-b.js': chunk('/app/frontend/src/lib/media-ingest.js'),
-      'assets/de-c.js': chunk('/app/frontend/src/locales/de.js'),
-      'assets/de-d.js': chunk('/app/frontend/src/instr/de.js'),
-      'assets/ru-e.js': chunk('/app/frontend/src/exercise-names/ru.js'),
+      'assets/zh-c.js': chunk('/app/frontend/src/locales/zh.js'),
+      'assets/zh-d.js': chunk('/app/frontend/src/instr/zh.js'),
+      'assets/zh-e.js': chunk('/app/frontend/src/exercise-names/zh.js'),
       'assets/index-f.css': { type: 'asset' },
       'icon-512.png': { type: 'asset' },
       // the English steps and descriptions every language falls back to: offline as well
       'assets/en-g.js': chunk('/app/frontend/src/instr/en.js'),
       'assets/en-h.js': chunk('/app/frontend/src/exercise-desc/en.js'),
-      'assets/de-i.js': chunk('/app/frontend/src/exercise-desc/de.js'),
+      'assets/zh-i.js': chunk('/app/frontend/src/exercise-desc/zh.js'),
     }
-    expect(lazyAssets(bundle)).toEqual(['./assets/de-i.js', './assets/en-g.js', './assets/en-h.js', './assets/index-a.js', './assets/index-f.css', './assets/media-ingest-b.js'])
+    expect(lazyAssets(bundle)).toEqual(['./assets/en-g.js', './assets/en-h.js', './assets/index-a.js', './assets/index-f.css', './assets/media-ingest-b.js', './assets/zh-i.js'])
   })
 
   it('the build stamps the worker with both', () => {

@@ -267,12 +267,12 @@ describe('CoachIntake — the consent screen', () => {
     // The screen used to pass these lines to t() as variables, which check-source-strings cannot
     // see, and eight of the ten had no translation in any pack.
     const english = Object.values(CATEGORY_TEXT).map(text => text())
-    const de = (await import('../locales/de.js')).default
-    await setLang('de')
+    const zh = (await import('../locales/zh.js')).default
+    await setLang('zh')
     try {
       mount()
       expect(all('.ob-consent-row').map(r => [r.querySelector('b').textContent, r.querySelector('span').textContent]))
-        .toEqual(english.map(([title, sub]) => [de[title], de[sub]]))
+        .toEqual(english.map(([title, sub]) => [zh[title], zh[sub]]))
     } finally { await setLang('en') }
   })
 
@@ -324,15 +324,15 @@ describe('CoachIntake — the two answers that gate the flow', () => {
       ['Training regularly', 'Consistent for a while now.']
     ]
     const choices = () => all('.ob-choice').map(c => [c.querySelector('.ob-choice-t').firstChild.textContent, c.querySelector('.ob-choice-s').textContent])
-    const de = (await import('../locales/de.js')).default
+    const zh = (await import('../locales/zh.js')).default
     mocks.S.coach = { consent: { agreedAt: '2026-09-01T00:00:00Z', version: CONSENT_VERSION }, profile: null, chat: [] }
-    await setLang('de')
+    await setLang('zh')
     try {
       mount()
-      expect(choices()).toEqual(goals.map(([title, sub]) => [de[title], de[sub]]))
+      expect(choices()).toEqual(goals.map(([title, sub]) => [zh[title], zh[sub]]))
       act(() => host.querySelector('.ob-choice').click())
       cont()
-      expect(choices()).toEqual(experience.map(([title, sub]) => [de[title], de[sub]]))
+      expect(choices()).toEqual(experience.map(([title, sub]) => [zh[title], zh[sub]]))
     } finally { await setLang('en') }
   })
 
